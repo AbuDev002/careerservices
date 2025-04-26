@@ -57,7 +57,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT || '21' }}
         local-dir: ./
-        server-dir: ./public_html/careerservices
+        server-dir: ./public_html/careerservices/
         exclude: |
           **/.env*
           **/.git*
