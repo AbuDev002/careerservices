@@ -1,0 +1,67 @@
+name: FTP Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3' # Laravel 12 requires PHP 8.2+
+        extensions: mbstring, ctype, fileinfo, openssl, PDO, mysql, tokenizer, xml, dom, curl
+        tools: composer
+
+    - name: Install dependencies
+      run: |
+        composer install --no-dev --prefer-dist --optimize-autoloader
+        npm install
+        npm run build
+
+    - name: Cache .env file
+      run: |
+        if [ -f .env ]; then
+          cp .env .env.backup
+        fi
+
+    - name: Remove development files
+      run: |
+        rm -rf node_modules/
+        rm -rf tests/
+        rm -rf .github/
+        rm -rf .git/
+        rm -rf .gitattributes
+        rm -rf .gitignore
+        rm -rf package-lock.json
+        rm -rf composer.lock
+        rm -rf phpunit.xml
+
+    - name: Restore .env file
+      run: |
+        if [ -f .env.backup ]; then
+          mv .env.backup .env
+        fi
+
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.1
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: ${{ secrets.FTP_PORT || '21' }}
+        local-dir: ./
+        server-dir: ./public_html/
+        exclude: |
+          **/.env*
+          **/.git*
+          **/.github/*
+          **/storage/*
+          **/tests/*
+          **/node_modules/*
