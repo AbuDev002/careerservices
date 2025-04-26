@@ -65,3 +65,15 @@ jobs:
           **/storage/*
           **/tests/*
           **/node_modules/*
+
+    - name: Run post-deploy commands
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }} # Add this to secrets if needed
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd ~/public_html
+          php artisan migrate --force
+          php artisan optimize:clear
+          php artisan optimize
