@@ -57,7 +57,12 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT || '21' }}
         local-dir: ./
-        server-dir: ./public_html/careerservices/
+        server-dir: ./careerservices/
+        protocol: ftps      
+        secure: true       
+        passive: true      
+        timeout: 600      
+        verify: false 
         exclude: |
           **/.env*
           **/.git*
